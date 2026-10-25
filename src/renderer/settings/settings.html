@@ -3,117 +3,191 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FocusBreak Settings</title>
+  <title>FocusBreak Control Center</title>
   <link rel="stylesheet" href="settings.css">
 </head>
 <body>
-  <div class="settings-container">
-    <div class="settings-header">
-      <div class="header-icon">⚙️</div>
-      <div class="header-text">
-        <h2>FocusBreak Settings</h2>
-        <p>Customize your focus and break intervals</p>
+  <div class="app-window">
+    <!-- Header (PRO badge removed) -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="title-line">
+            <h1>FocusBreak</h1>
+          </div>
+          <p>Productivity & Break Management</p>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <form id="settingsForm" class="settings-form">
-      <div class="section-title">Interval Durations</div>
+    <!-- Master Timer Hero Card -->
+    <section class="timer-hero-card" id="timerCard">
+      <div class="hero-left">
+        <div class="status-pill" id="statusPill">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-label" id="statusText">Active (Working)</span>
+        </div>
+        <div class="hero-time" id="timerTime">00:00</div>
+        <div class="hero-subtext" id="timerSubtext">Focus session in progress</div>
+      </div>
 
-      <div class="form-group">
-        <label for="workMinutes">
-          <span class="label-title">Work Session</span>
-          <span class="label-desc">Time working before a break</span>
-        </label>
-        <div class="input-with-unit">
-          <input type="number" id="workMinutes" min="1" max="240" required>
-          <span class="unit">min</span>
+      <div class="hero-right">
+        <button type="button" id="toggleTimerBtn" class="btn-hero-action btn-terminate">
+          <span class="btn-action-icon" id="toggleBtnIcon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+            </svg>
+          </span>
+          <span id="toggleBtnText">Terminate Timer</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Configuration Form -->
+    <form id="settingsForm" class="settings-form" novalidate>
+      <!-- Section: Durations with Inline Errors -->
+      <div class="card-section">
+        <div class="section-header">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <h3>Timing Configuration</h3>
+        </div>
+
+        <!-- Work Minutes -->
+        <div class="setting-item-block">
+          <div class="setting-row">
+            <div class="setting-meta">
+              <span class="setting-name">Work Session</span>
+              <span class="setting-hint">Time spent working before a break</span>
+            </div>
+            <div class="number-input-group" id="groupWorkMinutes">
+              <input type="number" id="workMinutes" required>
+              <span class="input-suffix">min</span>
+            </div>
+          </div>
+          <div class="inline-error" id="errorWorkMinutes"></div>
+        </div>
+
+        <!-- Pre-Break Warning -->
+        <div class="setting-item-block">
+          <div class="setting-row">
+            <div class="setting-meta">
+              <span class="setting-name">Pre-Break Warning</span>
+              <span class="setting-hint">Banner alert before screen locks</span>
+            </div>
+            <div class="number-input-group" id="groupWarningSeconds">
+              <input type="number" id="warningSeconds" required>
+              <span class="input-suffix">sec</span>
+            </div>
+          </div>
+          <div class="inline-error" id="errorWarningSeconds"></div>
+        </div>
+
+        <!-- Break Minutes -->
+        <div class="setting-item-block">
+          <div class="setting-row">
+            <div class="setting-meta">
+              <span class="setting-name">Break Duration</span>
+              <span class="setting-hint">Length of full black screen</span>
+            </div>
+            <div class="number-input-group" id="groupBreakMinutes">
+              <input type="number" id="breakMinutes" required>
+              <span class="input-suffix">min</span>
+            </div>
+          </div>
+          <div class="inline-error" id="errorBreakMinutes"></div>
+        </div>
+
+        <!-- Skip Lockout Seconds -->
+        <div class="setting-item-block">
+          <div class="setting-row">
+            <div class="setting-meta">
+              <span class="setting-name">Skip Lockout Delay</span>
+              <span class="setting-hint">Mandatory break time before Skip enables</span>
+            </div>
+            <div class="number-input-group" id="groupSkipLockout">
+              <input type="number" id="skipLockoutSeconds" required>
+              <span class="input-suffix">sec</span>
+            </div>
+          </div>
+          <div class="inline-error" id="errorSkipLockout"></div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="warningSeconds">
-          <span class="label-title">Pre-Break Warning</span>
-          <span class="label-desc">Alert banner with Skip & Postpone</span>
-        </label>
-        <div class="input-with-unit">
-          <input type="number" id="warningSeconds" min="0" max="300" step="5" required>
-          <span class="unit">sec</span>
+      <!-- Section: Automations -->
+      <div class="card-section">
+        <div class="section-header">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+          </svg>
+          <h3>Automation & Controls</h3>
+        </div>
+
+        <div class="toggle-item">
+          <div class="setting-meta">
+            <span class="setting-name">Auto-Pause Media</span>
+            <span class="setting-hint">Pause YouTube, browser video & Spotify on break</span>
+          </div>
+          <label class="modern-switch">
+            <input type="checkbox" id="pauseMedia">
+            <span class="switch-handle"></span>
+          </label>
+        </div>
+
+        <div class="toggle-item">
+          <div class="setting-meta">
+            <span class="setting-name">Start with Windows</span>
+            <span class="setting-hint">Launch silently on PC startup (disabled if terminated)</span>
+          </div>
+          <label class="modern-switch">
+            <input type="checkbox" id="autoStart">
+            <span class="switch-handle"></span>
+          </label>
+        </div>
+
+        <div class="toggle-item">
+          <div class="setting-meta">
+            <span class="setting-name">Cover All Monitors</span>
+            <span class="setting-hint">Display black overlay on all connected displays</span>
+          </div>
+          <label class="modern-switch">
+            <input type="checkbox" id="multiMonitor">
+            <span class="switch-handle"></span>
+          </label>
+        </div>
+
+        <div class="toggle-item">
+          <div class="setting-meta">
+            <span class="setting-name">Audio Chime</span>
+            <span class="setting-hint">Gentle sound cue when warning and break begins</span>
+          </div>
+          <label class="modern-switch">
+            <input type="checkbox" id="chimeSound">
+            <span class="switch-handle"></span>
+          </label>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="breakMinutes">
-          <span class="label-title">Break Duration</span>
-          <span class="label-desc">Length of full black screen</span>
-        </label>
-        <div class="input-with-unit">
-          <input type="number" id="breakMinutes" min="1" max="60" required>
-          <span class="unit">min</span>
+      <!-- Actions Bar -->
+      <footer class="app-footer">
+        <div class="status-msg-wrap">
+          <span id="saveStatus" class="save-status-msg"></span>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label for="skipLockoutSeconds">
-          <span class="label-title">Skip Lockout Delay</span>
-          <span class="label-desc">Mandatory wait before Skip is enabled</span>
-        </label>
-        <div class="input-with-unit">
-          <input type="number" id="skipLockoutSeconds" min="0" max="3600" step="5" required>
-          <span class="unit">sec</span>
+        <div class="footer-buttons">
+          <button type="button" id="cancelBtn" class="btn-flat">Close</button>
+          <button type="submit" id="saveBtn" class="btn-solid" disabled>
+            <span>Save & Apply</span>
+          </button>
         </div>
-      </div>
-
-      <div class="section-title">Automations & Behavior</div>
-
-      <div class="toggle-group">
-        <div class="toggle-info">
-          <span class="label-title">Auto-Pause Media</span>
-          <span class="label-desc">Pause YouTube, browser tabs & music on break</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="pauseMedia">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="toggle-group">
-        <div class="toggle-info">
-          <span class="label-title">Start with Windows</span>
-          <span class="label-desc">Launch silently in system tray on boot</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="autoStart">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="toggle-group">
-        <div class="toggle-info">
-          <span class="label-title">Cover All Monitors</span>
-          <span class="label-desc">Show black overlay across all connected displays</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="multiMonitor">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="toggle-group">
-        <div class="toggle-info">
-          <span class="label-title">Chime Sound Notification</span>
-          <span class="label-desc">Gentle audio prompt when break starts & ends</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="chimeSound">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="actions-bar">
-        <span id="saveStatus" class="status-msg"></span>
-        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
-        <button type="submit" id="saveBtn" class="btn btn-primary">Save & Apply</button>
-      </div>
+      </footer>
     </form>
   </div>
 

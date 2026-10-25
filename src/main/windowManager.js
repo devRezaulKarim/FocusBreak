@@ -22,10 +22,10 @@ class WindowManager {
     const primaryDisplay = screen.getPrimaryDisplay();
     const { workArea } = primaryDisplay;
 
-    const width = 390;
-    const height = 125;
-    const x = workArea.x + workArea.width - width - 20;
-    const y = workArea.y + workArea.height - height - 20;
+    const width = 420;
+    const height = 150;
+    const x = workArea.x + workArea.width - width - 24;
+    const y = workArea.y + workArea.height - height - 24;
 
     this.bannerWindow = new BrowserWindow({
       width,
@@ -58,10 +58,10 @@ class WindowManager {
     if (!this.bannerWindow || this.bannerWindow.isDestroyed()) return;
     const primaryDisplay = screen.getPrimaryDisplay();
     const { workArea } = primaryDisplay;
-    const width = 390;
-    const height = 125;
-    const x = workArea.x + workArea.width - width - 20;
-    const y = workArea.y + workArea.height - height - 20;
+    const width = 420;
+    const height = 150;
+    const x = workArea.x + workArea.width - width - 24;
+    const y = workArea.y + workArea.height - height - 24;
     this.bannerWindow.setBounds({ x, y, width, height });
   }
 
@@ -139,14 +139,14 @@ class WindowManager {
     }
 
     this.settingsWindow = new BrowserWindow({
-      width: 480,
-      height: 600,
+      width: 520,
+      height: 720,
       resizable: false,
-      minimizable: false,
+      minimizable: true,
       maximizable: false,
-      title: 'FocusBreak Settings',
+      title: 'FocusBreak Control Center',
       autoHideMenuBar: true,
-      backgroundColor: '#12141a',
+      backgroundColor: '#0a0d14',
       webPreferences: {
         preload: path.join(__dirname, '../preload/settingsPreload.js'),
         contextIsolation: true,

@@ -21,7 +21,7 @@ class TrayManager {
     }
 
     this.tray = new Tray(icon);
-    this.tray.setToolTip('FocusBreak: Starting...');
+    this.tray.setToolTip('FocusBreak');
 
     this.tray.on('double-click', () => {
       this.windowManager.showSettings();
@@ -31,7 +31,6 @@ class TrayManager {
   }
 
   createDefaultIcon() {
-    // Fallback: 16x16 minimalist blue clock icon using data URL
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
         <circle cx="8" cy="8" r="7" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
@@ -43,6 +42,11 @@ class TrayManager {
 
   updateTooltip(status) {
     if (!this.tray) return;
+
+    if (status.state === 'TERMINATED') {
+      this.tray.setToolTip('FocusBreak: Terminated (Inactive)');
+      return;
+    }
 
     let text = 'FocusBreak';
     const mins = Math.floor(status.remainingSeconds / 60);
@@ -76,43 +80,69 @@ class TrayManager {
     if (!this.tray) return;
 
     const { state } = this.stateMachine.getStatus();
+    const isTerminated = state === 'TERMINATED';
     const isPaused = state === 'PAUSED';
     const isBreak = state === 'BREAK_LOCKED' || state === 'BREAK_UNLOCKED';
 
-    const contextMenu = Menu.buildFromTemplate([
-      {
-        label: `Status: ${state.replace('_', ' ')}`,
-        enabled: false
-      },
-      { type: 'separator' },
-      {
-        label: 'Take Break Now',
-        enabled: !isBreak,
-        click: () => this.stateMachine.takeBreakNow()
-      },
-      {
-        label: isPaused ? 'Resume Timer' : 'Pause Timer',
-        click: () => {
-          this.stateMachine.togglePause();
-          this.updateMenu();
-        }
-      },
-      {
-        label: 'Reset Work Session',
-        click: () => this.stateMachine.reset()
-      },
-      { type: 'separator' },
-      {
-        label: 'Settings...',
-        click: () => this.windowManager.showSettings()
-      },
-      { type: 'separator' },
-      {
-        label: 'Quit FocusBreak',
-        click: () => app.quit()
-      }
-    ]);
+    let menuTemplate = [];
 
+    if (isTerminated) {
+      menuTemplate = [
+        { label: 'Status: Terminated (Inactive)', enabled: false },
+        { type: 'separator' },
+        {
+          label: '▶️ Start Timer',
+          click: () => this.stateMachine.startTimer()
+        },
+        { type: 'separator' },
+        {
+          label: 'Settings...',
+          click: () => this.windowManager.showSettings()
+        },
+        { type: 'separator' },
+        {
+          label: 'Quit FocusBreak',
+          click: () => app.quit()
+        }
+      ];
+    } else {
+      menuTemplate = [
+        { label: `Status: ${state.replace('_', ' ')}`, enabled: false },
+        { type: 'separator' },
+        {
+          label: 'Take Break Now',
+          enabled: !isBreak,
+          click: () => this.stateMachine.takeBreakNow()
+        },
+        {
+          label: isPaused ? 'Resume Timer' : 'Pause Timer',
+          click: () => {
+            this.stateMachine.togglePause();
+            this.updateMenu();
+          }
+        },
+        {
+          label: 'Reset Work Session',
+          click: () => this.stateMachine.reset()
+        },
+        {
+          label: '🛑 Terminate Timer',
+          click: () => this.stateMachine.terminate()
+        },
+        { type: 'separator' },
+        {
+          label: 'Settings...',
+          click: () => this.windowManager.showSettings()
+        },
+        { type: 'separator' },
+        {
+          label: 'Quit FocusBreak',
+          click: () => app.quit()
+        }
+      ];
+    }
+
+    const contextMenu = Menu.buildFromTemplate(menuTemplate);
     this.tray.setContextMenu(contextMenu);
   }
 

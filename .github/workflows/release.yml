@@ -1,0 +1,89 @@
+name: Release Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Release Windows Executables
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract package version
+        id: pkg
+        shell: pwsh
+        run: |
+          $packageJson = Get-Content package.json | ConvertFrom-Json
+          $version = $packageJson.version
+          Write-Output "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Output "tag=v$version" >> $env:GITHUB_OUTPUT
+
+      - name: Generate assets
+        run: |
+          node scripts/generate-assets.js
+          node scripts/generate-chime.js
+
+      - name: Build Windows binaries
+        run: npm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package source code archive
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.pkg.outputs.version }}"
+          Compress-Archive -Path "src", "assets", "scripts", "package.json", "package-lock.json", "README.md", "REQUIREMENTS.md", "TECHNICAL_DOC.md" -DestinationPath "dist/FocusBreak-$ver-source-code.zip" -Force
+          Write-Output "Source zip created."
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.pkg.outputs.tag }}
+          name: "FocusBreak v${{ steps.pkg.outputs.version }}"
+          draft: false
+          prerelease: false
+          make_latest: true
+          generate_release_notes: true
+          body: |
+            ## FocusBreak v${{ steps.pkg.outputs.version }}
+
+            A modern, intelligent Windows break enforcement and focus timer designed to improve ergonomics, eye comfort, and productivity.
+
+            ### 📥 Download Assets
+            - **Installer (Recommended):** `FocusBreak Setup ${{ steps.pkg.outputs.version }}.exe` (Standard Windows installer with Administrator UAC prompt and desktop shortcuts)
+            - **Portable Version:** `FocusBreak ${{ steps.pkg.outputs.version }}.exe` (Runs directly without installation)
+            - **Source Code Archive:** `FocusBreak-${{ steps.pkg.outputs.version }}-source-code.zip` (Complete source code)
+
+            ### ✨ Key Features
+            - **Windows 11 Acrylic UI:** Glassmorphism aesthetic, master timer hero card, and real-time status.
+            - **Pre-Break Warning Banner:** 1-minute early warning card with `[X]` Close, Skip, and Postpone 5m buttons.
+            - **Fullscreen Black Break Overlay:** Covers all monitors with an ambient breathing aura and circular dial.
+            - **Locked Skip Button:** Enforces mandatory break time before unlocking.
+            - **Idempotent Windows Media Pause:** Auto-pauses YouTube, Spotify, and browser media when breaks trigger.
+            - **Master Timer Terminate & Start:** Disarms Windows startup when terminated.
+          files: |
+            dist/FocusBreak Setup *.exe
+            dist/FocusBreak *.exe
+            dist/FocusBreak-*-source-code.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

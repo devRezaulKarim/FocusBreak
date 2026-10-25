@@ -22,10 +22,11 @@ End users **do not need Node.js, Python, or any developer tools** installed on t
 
 ### 2.1 Installation Experience for Everyday Users
 - **Standard Windows Installer (`.exe`):**
-  - Download and double-click the setup file (just like Chrome, Spotify, or Discord).
-  - Automatically installs into `AppData\Local\Programs` without requiring administrator privileges or technical configuration.
-  - Automatically adds a desktop shortcut and a Start Menu item.
-  - Includes a standard Uninstaller accessible from Windows **Settings > Apps > Installed apps**.
+  - Standard, interactive Windows Setup Wizard with Administrator UAC prompt (`perMachine: true`).
+  - Asks permission before installing to `C:\Program Files\FocusBreak` for transparency and trust.
+  - Automatically adds desktop and Start Menu shortcuts.
+  - Allows selecting custom installation directory and includes standard Uninstaller in Windows **Settings > Apps > Installed apps**.
+  - **First-Run Experience:** Automatically launches the **FocusBreak Control Center (GUI)** immediately after installation so the user can configure intervals and see active status before the timer begins.
 - **Portable Version (Optional alternative):**
   - A single standalone `.exe` that runs immediately from a USB flash drive or any folder without running an installer.
 
@@ -122,7 +123,21 @@ To ensure the app never disrupts an important meeting, video call, presentation,
 
 ---
 
-### 3.7 Settings Window (Simple & Non-Technical)
+### 3.7 Master Timer Control & Termination (New)
+1. **Terminate Timer Action:**
+   - The user can click **"🛑 Terminate Timer"** at any time from the Control Center GUI or from the System Tray.
+   - When terminated:
+     - The timer completely ceases running.
+     - All active banners and black screen overlays close immediately.
+     - Crucially, **Windows Autostart is disabled / disarmed**: when the PC powers on or reboots, the timer will **NOT** run automatically.
+     - The Control Center GUI displays a status of 🔴 **Terminated (Inactive)** and shows a prominent **"▶️ Start Timer"** button.
+2. **Start Timer Action:**
+   - Clicking **"▶️ Start Timer"** transitions the application back to active focus mode.
+   - Begins the work timer session fresh.
+   - Re-enables Windows Autostart on boot (if enabled in user settings).
+   - Toggles the button back to **"🛑 Terminate Timer"**.
+
+### 3.8 Settings Window (Simple & Non-Technical)
 A clean, attractive dialog window with simple sliders, number boxes, and toggle switches:
 
 | Setting | Default Value | Description |

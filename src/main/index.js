@@ -23,7 +23,6 @@ let trayManager;
 
 function playChime() {
   const chimePath = path.join(__dirname, '../../assets/chime.wav');
-  // Play asynchronously via Windows Media.SoundPlayer
   try {
     spawn('powershell.exe', [
       '-NoProfile',
@@ -32,7 +31,7 @@ function playChime() {
       `(New-Object Media.SoundPlayer '${chimePath}').Play()`
     ], { detached: true, stdio: 'ignore' }).unref();
   } catch (err) {
-    // Non-fatal if audio fails
+    // Non-fatal
   }
 }
 
@@ -45,26 +44,38 @@ app.whenReady().then(() => {
 
   trayManager.init();
 
-  // Sync Windows autostart setting
-  const initialConfig = configManager.get();
-  AutostartManager.sync(initialConfig.autoStart);
+  const currentConfig = configManager.get();
+  // Sync autostart considering termination state
+  AutostartManager.sync(currentConfig.autoStart, currentConfig.isTerminated);
 
   // Hook up State Machine events
   stateMachine.on('state-changed', async ({ previousState, currentState }) => {
     const config = configManager.get();
 
+    // Check if transitioning into a break from a non-break state
+    const isEnteringBreak = (currentState === States.BREAK_LOCKED || currentState === States.BREAK_UNLOCKED) &&
+                            previousState !== States.BREAK_LOCKED &&
+                            previousState !== States.BREAK_UNLOCKED;
+
     if (currentState === States.WARNING) {
       windowManager.showBanner();
       if (config.chimeSound) playChime();
-    } else if (currentState === States.BREAK_LOCKED || currentState === States.BREAK_UNLOCKED) {
+    } else if (isEnteringBreak) {
+      // Pause active media once per break session
       if (config.pauseMedia) {
         mediaController.pauseMedia();
       }
       windowManager.showOverlay();
       if (config.chimeSound) playChime();
     } else if (currentState === States.WORKING) {
+      mediaController.resetPauseState();
       windowManager.destroyOverlay();
       windowManager.hideBanner();
+    } else if (currentState === States.TERMINATED) {
+      mediaController.resetPauseState();
+      windowManager.destroyOverlay();
+      windowManager.hideBanner();
+      AutostartManager.sync(false, true);
     }
 
     trayManager.updateMenu();
@@ -82,14 +93,13 @@ app.whenReady().then(() => {
     stateMachine.emergencyDismiss();
   });
 
-  // System power resume handling (sleep/wake)
+  // System power resume handling
   powerMonitor.on('resume', () => {
     stateMachine._tick();
   });
 
-  // IPC handlers: Pre-break warning banner
+  // Pre-break banner IPCs
   ipcMain.on('banner:close', () => {
-    // Dismisses banner visually only; timer continues running quietly
     windowManager.hideBanner();
   });
 
@@ -105,21 +115,38 @@ app.whenReady().then(() => {
     stateMachine.takeBreakNow();
   });
 
-  // IPC handlers: Break overlay
+  // Overlay IPCs
   ipcMain.on('overlay:skip', () => {
     stateMachine.skipBreak();
   });
 
-  // IPC handlers: Settings
+  // Timer Control IPCs (Terminate & Start)
+  ipcMain.handle('timer:terminate', () => {
+    stateMachine.terminate();
+    return stateMachine.getStatus();
+  });
+
+  ipcMain.handle('timer:start', () => {
+    stateMachine.startTimer();
+    const cfg = configManager.get();
+    AutostartManager.sync(cfg.autoStart, false);
+    return stateMachine.getStatus();
+  });
+
+  ipcMain.handle('timer:status', () => {
+    return stateMachine.getStatus();
+  });
+
+  // Settings IPCs
   ipcMain.handle('config:get', () => {
     return configManager.get();
   });
 
   ipcMain.handle('config:save', (_event, newConfig) => {
-    const res = configManager.save(newConfig);
+    // Once saved from GUI, mark as configured
+    const res = configManager.save({ ...newConfig, isConfigured: true });
     if (res.success) {
-      AutostartManager.sync(res.config.autoStart);
-      // Restart current work session with updated intervals if idling or working
+      AutostartManager.sync(res.config.autoStart, res.config.isTerminated);
       if (stateMachine.state === States.WORKING) {
         stateMachine.startWork();
       }
@@ -131,17 +158,23 @@ app.whenReady().then(() => {
     windowManager.closeSettings();
   });
 
-  // Second instance launched (e.g. clicked desktop icon while running)
+  // Second instance launched: open settings
   app.on('second-instance', () => {
     windowManager.showSettings();
   });
 
-  // Start the background timer engine immediately
+  // Start the background timer engine
   stateMachine.start();
+
+  // If this is an interactive run (not launched with --hidden on Windows boot),
+  // OR if this is the first run (not yet configured), open the GUI!
+  const isHiddenBoot = process.argv.includes('--hidden');
+  if (!isHiddenBoot || !currentConfig.isConfigured) {
+    windowManager.showSettings();
+  }
 });
 
 app.on('window-all-closed', (e) => {
-  // Prevent app from quitting when windows close (app lives in system tray)
   e.preventDefault();
 });
 

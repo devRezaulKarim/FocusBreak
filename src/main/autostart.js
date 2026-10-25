@@ -1,10 +1,13 @@
 const { app } = require('electron');
 
 class AutostartManager {
-  static sync(enabled) {
+  static sync(enabled, isTerminated = false) {
     try {
+      // If user terminated the timer, do NOT register with Windows startup!
+      const shouldAutostart = enabled && !isTerminated;
+
       app.setLoginItemSettings({
-        openAtLogin: enabled,
+        openAtLogin: shouldAutostart,
         openAsHidden: true,
         path: process.execPath,
         args: ['--hidden']
