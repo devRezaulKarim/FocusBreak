@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
@@ -48,13 +48,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Package source code archive
-        shell: pwsh
-        run: |
-          $ver = "${{ steps.pkg.outputs.version }}"
-          Compress-Archive -Path "src", "assets", "scripts", "package.json", "package-lock.json", "README.md", "REQUIREMENTS.md", "TECHNICAL_DOC.md" -DestinationPath "dist/FocusBreak-$ver-source-code.zip" -Force
-          Write-Output "Source zip created."
-
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -69,10 +62,11 @@ jobs:
 
             A modern, intelligent Windows break enforcement and focus timer designed to improve ergonomics, eye comfort, and productivity.
 
-            ### 📥 Download Assets
+            ### 📥 Download Executables
             - **Installer (Recommended):** `FocusBreak Setup ${{ steps.pkg.outputs.version }}.exe` (Standard Windows installer with Administrator UAC prompt and desktop shortcuts)
-            - **Portable Version:** `FocusBreak ${{ steps.pkg.outputs.version }}.exe` (Runs directly without installation)
-            - **Source Code Archive:** `FocusBreak-${{ steps.pkg.outputs.version }}-source-code.zip` (Complete source code)
+            - **Portable Version:** `FocusBreak ${{ steps.pkg.outputs.version }}.exe` (Standalone portable application, runs directly without installation)
+
+            *(Source code archives are automatically attached below by GitHub)*
 
             ### ✨ Key Features
             - **Windows 11 Acrylic UI:** Glassmorphism aesthetic, master timer hero card, and real-time status.
@@ -84,6 +78,5 @@ jobs:
           files: |
             dist/FocusBreak Setup *.exe
             dist/FocusBreak *.exe
-            dist/FocusBreak-*-source-code.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
