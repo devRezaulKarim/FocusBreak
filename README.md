@@ -4,6 +4,18 @@ An intelligent, non-intrusive break enforcement application for Windows 10 and W
 
 ---
 
+## 📥 Download & Installation (For Everyday Users)
+
+You **do not need Node.js or any developer tools** to use FocusBreak.
+
+1. Go to the latest release on the [**GitHub Releases Page**](https://github.com/devRezaulKarim/FocusBreak/releases/latest).
+2. Under **Assets**, download:
+   - **`FocusBreak Setup 1.0.0.exe`** (Recommended Windows Installer with Start Menu and Desktop shortcuts)
+   - Or **`FocusBreak 1.0.0.exe`** (Portable zero-install standalone version)
+3. Run the installer, allow Windows Administrator permission, and the FocusBreak Control Center will launch immediately!
+
+---
+
 ## ✨ Features
 
 - **Drift-Free Work & Break Cycle:**
