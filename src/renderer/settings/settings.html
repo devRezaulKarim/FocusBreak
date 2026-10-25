@@ -3,16 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FocusBreak Settings</title>
+  <title>FocusBreak Control & Settings</title>
   <link rel="stylesheet" href="settings.css">
 </head>
 <body>
   <div class="settings-container">
     <div class="settings-header">
-      <div class="header-icon">⚙️</div>
+      <div class="header-icon">☕</div>
       <div class="header-text">
-        <h2>FocusBreak Settings</h2>
-        <p>Customize your focus and break intervals</p>
+        <h2>FocusBreak Control Center</h2>
+        <p>Manage focus sessions, break overlays, and system startup</p>
+      </div>
+    </div>
+
+    <!-- Live Timer Master Control Card -->
+    <div class="timer-card" id="timerCard">
+      <div class="timer-info">
+        <div class="status-row">
+          <span class="status-indicator" id="statusDot"></span>
+          <span class="status-text" id="statusText">Active (Working)</span>
+        </div>
+        <div class="timer-time" id="timerTime">00:00</div>
+        <div class="timer-subtext" id="timerSubtext">Next break approaching</div>
+      </div>
+      <div class="timer-control-action">
+        <button type="button" id="toggleTimerBtn" class="btn-timer btn-terminate">
+          🛑 Terminate Timer
+        </button>
       </div>
     </div>
 
@@ -79,7 +96,7 @@
       <div class="toggle-group">
         <div class="toggle-info">
           <span class="label-title">Start with Windows</span>
-          <span class="label-desc">Launch silently in system tray on boot</span>
+          <span class="label-desc">Launch on PC boot (disabled if terminated)</span>
         </div>
         <label class="switch">
           <input type="checkbox" id="autoStart">
@@ -111,7 +128,7 @@
 
       <div class="actions-bar">
         <span id="saveStatus" class="status-msg"></span>
-        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="cancelBtn" class="btn btn-secondary">Close</button>
         <button type="submit" id="saveBtn" class="btn btn-primary">Save & Apply</button>
       </div>
     </form>

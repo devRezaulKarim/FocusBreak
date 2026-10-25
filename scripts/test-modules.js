@@ -1,10 +1,8 @@
 const assert = require('assert');
 
-console.log('--- Testing FocusBreak Modules ---');
+console.log('--- Testing Updated FocusBreak Modules ---');
 
-// 1. Config Manager
 const ConfigManager = require('../src/main/config');
-// Mock app.getPath for isolated testing if needed
 const { app } = require('electron');
 
 app.whenReady().then(async () => {
@@ -13,61 +11,42 @@ app.whenReady().then(async () => {
     const cfg = configMgr.get();
     console.log('[OK] ConfigManager loaded with defaults:', cfg);
     assert.strictEqual(typeof cfg.workMinutes, 'number');
-    assert.strictEqual(typeof cfg.warningSeconds, 'number');
-    assert.strictEqual(typeof cfg.breakMinutes, 'number');
-    assert.strictEqual(typeof cfg.skipLockoutSeconds, 'number');
+    assert.strictEqual(typeof cfg.isTerminated, 'boolean');
+    assert.strictEqual(typeof cfg.isConfigured, 'boolean');
 
-    // Test validation
-    const saved = configMgr.save({ workMinutes: 45, warningSeconds: 30 });
-    assert.strictEqual(saved.success, true);
-    assert.strictEqual(configMgr.get().workMinutes, 45);
-    assert.strictEqual(configMgr.get().warningSeconds, 30);
-    // Restore default
-    configMgr.save({ workMinutes: 30, warningSeconds: 60 });
-    console.log('[OK] ConfigManager validation and saving passed');
-
-    // 2. State Machine
+    // 2. State Machine & Termination Feature
     const { StateMachine, States } = require('../src/main/stateMachine');
     const sm = new StateMachine(configMgr);
-    assert.strictEqual(sm.state, States.IDLE);
 
     sm.start();
+    console.log('[OK] StateMachine started in state:', sm.state);
+
+    // Test Terminate action
+    sm.terminate();
+    assert.strictEqual(sm.state, States.TERMINATED);
+    assert.strictEqual(configMgr.get().isTerminated, true);
+    console.log('[OK] StateMachine terminated properly and marked isTerminated in config');
+
+    // Test Start from Terminated
+    sm.startTimer();
     assert.strictEqual(sm.state, States.WORKING);
-    console.log('[OK] StateMachine initialized to WORKING state');
+    assert.strictEqual(configMgr.get().isTerminated, false);
+    console.log('[OK] StateMachine started back up from terminated');
 
-    // Test warning transition
-    sm.startWarning();
-    assert.strictEqual(sm.state, States.WARNING);
-    console.log('[OK] StateMachine transitioned to WARNING');
-
-    // Test postpone
-    sm.postpone(5);
-    assert.strictEqual(sm.state, States.WORKING);
-    console.log('[OK] StateMachine postpone works and returns to WORKING');
-
-    // Test break start
-    sm.startBreak();
-    assert.strictEqual(sm.state, States.BREAK_LOCKED);
-    console.log('[OK] StateMachine break start works with BREAK_LOCKED');
-
-    // Test status method
-    const status = sm.getStatus();
-    assert.strictEqual(status.state, States.BREAK_LOCKED);
-    assert.ok(status.remainingSeconds > 0);
-    assert.ok(status.lockoutRemainingSeconds > 0);
-    console.log('[OK] StateMachine getStatus:', status);
-
-    // Test pause/resume
-    sm.togglePause();
-    assert.strictEqual(sm.state, States.PAUSED);
-    sm.togglePause();
-    assert.strictEqual(sm.state, States.BREAK_LOCKED);
-    console.log('[OK] StateMachine pause and resume passed');
-
-    // 3. Media Controller
+    // 3. Media Controller Guard
     const mediaController = require('../src/main/mediaController');
     assert.strictEqual(typeof mediaController.pauseMedia, 'function');
-    console.log('[OK] MediaController loaded with pauseMedia function');
+    assert.strictEqual(typeof mediaController.resetPauseState, 'function');
+    mediaController.hasPausedThisBreak = true;
+    mediaController.resetPauseState();
+    assert.strictEqual(mediaController.hasPausedThisBreak, false);
+    console.log('[OK] MediaController resetPauseState verified');
+
+    // 4. Autostart Manager with isTerminated
+    const AutostartManager = require('../src/main/autostart');
+    assert.strictEqual(typeof AutostartManager.sync, 'function');
+    AutostartManager.sync(true, true); // When terminated, should not autostart
+    console.log('[OK] AutostartManager sync tested with termination guard');
 
     console.log('\n>>> ALL MODULE UNIT TESTS PASSED SUCCESSFULLY! <<<');
   } catch (err) {

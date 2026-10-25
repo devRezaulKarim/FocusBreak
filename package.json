@@ -15,7 +15,7 @@
     "windows",
     "electron"
   ],
-  "author": "RKZ",
+  "author": "FocusBreak",
   "license": "MIT",
   "devDependencies": {
     "electron": "^34.2.0",
@@ -35,12 +35,14 @@
       "icon": "assets/icon.ico"
     },
     "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": false,
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "FocusBreak"
+      "shortcutName": "FocusBreak",
+      "runAfterFinish": true
     }
   }
 }

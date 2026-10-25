@@ -10,8 +10,71 @@ const chimeSoundInput = document.getElementById('chimeSound');
 const cancelBtn = document.getElementById('cancelBtn');
 const saveStatus = document.getElementById('saveStatus');
 
-async function loadSettings() {
+// Timer Card Elements
+const timerCard = document.getElementById('timerCard');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const timerTime = document.getElementById('timerTime');
+const timerSubtext = document.getElementById('timerSubtext');
+const toggleTimerBtn = document.getElementById('toggleTimerBtn');
+
+let currentState = 'IDLE';
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateUIState(state, remainingSeconds = 0) {
+  currentState = state;
+
+  if (state === 'TERMINATED') {
+    timerCard.className = 'timer-card terminated';
+    statusDot.className = 'status-indicator red';
+    statusText.textContent = 'Terminated (Inactive)';
+    timerTime.textContent = '--:--';
+    timerSubtext.textContent = 'Timer is stopped and will not start on PC boot';
+    toggleTimerBtn.className = 'btn-timer btn-start';
+    toggleTimerBtn.innerHTML = '▶️ Start Timer';
+  } else if (state === 'WORKING') {
+    timerCard.className = 'timer-card active';
+    statusDot.className = 'status-indicator';
+    statusText.textContent = 'Active (Working)';
+    timerTime.textContent = formatTime(remainingSeconds);
+    timerSubtext.textContent = 'Focus session in progress';
+    toggleTimerBtn.className = 'btn-timer btn-terminate';
+    toggleTimerBtn.innerHTML = '🛑 Terminate Timer';
+  } else if (state === 'WARNING') {
+    timerCard.className = 'timer-card active';
+    statusDot.className = 'status-indicator yellow';
+    statusText.textContent = 'Warning (Break Soon)';
+    timerTime.textContent = formatTime(remainingSeconds);
+    timerSubtext.textContent = 'Pre-break warning active';
+    toggleTimerBtn.className = 'btn-timer btn-terminate';
+    toggleTimerBtn.innerHTML = '🛑 Terminate Timer';
+  } else if (state === 'BREAK_LOCKED' || state === 'BREAK_UNLOCKED') {
+    timerCard.className = 'timer-card active';
+    statusDot.className = 'status-indicator yellow';
+    statusText.textContent = 'On Break';
+    timerTime.textContent = formatTime(remainingSeconds);
+    timerSubtext.textContent = 'Break in progress';
+    toggleTimerBtn.className = 'btn-timer btn-terminate';
+    toggleTimerBtn.innerHTML = '🛑 Terminate Timer';
+  } else if (state === 'PAUSED') {
+    timerCard.className = 'timer-card';
+    statusDot.className = 'status-indicator yellow';
+    statusText.textContent = 'Paused';
+    timerTime.textContent = formatTime(remainingSeconds);
+    timerSubtext.textContent = 'Timer temporarily paused';
+    toggleTimerBtn.className = 'btn-timer btn-terminate';
+    toggleTimerBtn.innerHTML = '🛑 Terminate Timer';
+  }
+}
+
+async function init() {
   if (!window.settingsAPI) return;
+
   try {
     const config = await window.settingsAPI.getConfig();
     workMinutesInput.value = config.workMinutes;
@@ -22,10 +85,33 @@ async function loadSettings() {
     autoStartInput.checked = !!config.autoStart;
     multiMonitorInput.checked = !!config.multiMonitor;
     chimeSoundInput.checked = !!config.chimeSound;
+
+    const status = await window.settingsAPI.getStatus();
+    updateUIState(status.state, status.remainingSeconds);
   } catch (err) {
-    console.error('Failed to load settings:', err);
+    console.error('Failed to initialize settings:', err);
   }
+
+  window.settingsAPI.onTick((data) => {
+    updateUIState(data.state, data.remainingSeconds);
+  });
+
+  window.settingsAPI.onStateChange((data) => {
+    updateUIState(data.currentState, 0);
+  });
 }
+
+toggleTimerBtn.addEventListener('click', async () => {
+  if (!window.settingsAPI) return;
+
+  if (currentState === 'TERMINATED') {
+    const status = await window.settingsAPI.startTimer();
+    updateUIState(status.state, status.remainingSeconds);
+  } else {
+    const status = await window.settingsAPI.terminateTimer();
+    updateUIState(status.state, 0);
+  }
+});
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -66,4 +152,4 @@ cancelBtn.addEventListener('click', () => {
   }
 });
 
-loadSettings();
+init();

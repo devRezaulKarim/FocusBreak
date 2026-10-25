@@ -13,6 +13,11 @@ if (!isPrimary && actionArea) {
   actionArea.style.display = 'none';
 }
 
+// Absorb keyboard events so background browser windows/apps don't receive accidental keypresses
+window.addEventListener('keydown', (e) => {
+  e.stopPropagation();
+});
+
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;

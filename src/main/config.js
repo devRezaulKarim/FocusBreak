@@ -10,7 +10,9 @@ const DEFAULT_CONFIG = {
   pauseMedia: true,
   autoStart: true,
   multiMonitor: true,
-  chimeSound: true
+  chimeSound: true,
+  isTerminated: false,
+  isConfigured: false
 };
 
 class ConfigManager {
@@ -45,7 +47,6 @@ class ConfigManager {
       validated.breakMinutes = Math.floor(cfg.breakMinutes);
     }
     if (typeof cfg.skipLockoutSeconds === 'number' && cfg.skipLockoutSeconds >= 0) {
-      // Ensure skip lockout does not exceed the total break time in seconds
       const maxLockout = validated.breakMinutes * 60;
       validated.skipLockoutSeconds = Math.min(Math.floor(cfg.skipLockoutSeconds), maxLockout);
     }
@@ -60,6 +61,12 @@ class ConfigManager {
     }
     if (typeof cfg.chimeSound === 'boolean') {
       validated.chimeSound = cfg.chimeSound;
+    }
+    if (typeof cfg.isTerminated === 'boolean') {
+      validated.isTerminated = cfg.isTerminated;
+    }
+    if (typeof cfg.isConfigured === 'boolean') {
+      validated.isConfigured = cfg.isConfigured;
     }
 
     return validated;

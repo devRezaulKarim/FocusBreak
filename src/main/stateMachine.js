@@ -6,7 +6,8 @@ const States = {
   WARNING: 'WARNING',
   BREAK_LOCKED: 'BREAK_LOCKED',
   BREAK_UNLOCKED: 'BREAK_UNLOCKED',
-  PAUSED: 'PAUSED'
+  PAUSED: 'PAUSED',
+  TERMINATED: 'TERMINATED'
 };
 
 class StateMachine extends EventEmitter {
@@ -34,6 +35,12 @@ class StateMachine extends EventEmitter {
   }
 
   start() {
+    const config = this.getConfig();
+    if (config.isTerminated) {
+      this.state = States.TERMINATED;
+      this._transition(States.TERMINATED);
+      return;
+    }
     this.startWork();
     this._startHeartbeat();
   }
@@ -105,12 +112,10 @@ class StateMachine extends EventEmitter {
   }
 
   skipWarning() {
-    // User clicked "Skip Break" on the pre-break warning banner
     this.startWork();
   }
 
   postpone(minutes = 5) {
-    // User clicked "Postpone (5m)" on the pre-break warning banner
     const addMs = minutes * 60 * 1000;
     const config = this.getConfig();
     const warningMs = config.warningSeconds * 1000;
@@ -136,13 +141,25 @@ class StateMachine extends EventEmitter {
   }
 
   emergencyDismiss() {
-    // Bypass shortcut invoked
     this.startWork();
   }
 
+  terminate() {
+    this._stopHeartbeat();
+    this.configManager.save({ isTerminated: true });
+    this._transition(States.TERMINATED);
+  }
+
+  startTimer() {
+    this.configManager.save({ isTerminated: false });
+    this.startWork();
+    this._startHeartbeat();
+  }
+
   togglePause() {
+    if (this.state === States.TERMINATED) return;
+
     if (this.state === States.PAUSED) {
-      // Resume
       const now = Date.now();
       this.targetEndTime = now + this.savedRemainingMs;
       if (this.savedLockoutMs > 0) {
@@ -151,7 +168,6 @@ class StateMachine extends EventEmitter {
       const resumeTo = this.previousState || States.WORKING;
       this._transition(resumeTo);
     } else {
-      // Pause
       this.previousState = this.state;
       const now = Date.now();
       this.savedRemainingMs = Math.max(0, this.targetEndTime - now);
@@ -161,11 +177,15 @@ class StateMachine extends EventEmitter {
   }
 
   reset() {
-    this.startWork();
+    if (this.state === States.TERMINATED) {
+      this.startTimer();
+    } else {
+      this.startWork();
+    }
   }
 
   _tick() {
-    if (this.state === States.IDLE || this.state === States.PAUSED) {
+    if (this.state === States.IDLE || this.state === States.PAUSED || this.state === States.TERMINATED) {
       return;
     }
 
@@ -176,13 +196,11 @@ class StateMachine extends EventEmitter {
         const remainingMs = this.targetEndTime - now;
         const config = this.getConfig();
 
-        // Check if it's time for the warning banner
         if (config.warningSeconds > 0 && now >= this.warningStartTime) {
           this.startWarning();
           return;
         }
 
-        // If warning is disabled, check if work time finished directly
         if (remainingMs <= 0) {
           this.startBreak();
           return;
@@ -218,13 +236,11 @@ class StateMachine extends EventEmitter {
         const remainingLockoutMs = this.lockoutEndTime - now;
 
         if (remainingBreakMs <= 0) {
-          // Full break finished
           this.startWork();
           return;
         }
 
         if (remainingLockoutMs <= 0) {
-          // Lockout duration finished, unlock skip button
           this._transition(States.BREAK_UNLOCKED);
           return;
         }
@@ -259,6 +275,14 @@ class StateMachine extends EventEmitter {
   }
 
   getStatus() {
+    if (this.state === States.TERMINATED) {
+      return {
+        state: States.TERMINATED,
+        remainingSeconds: 0,
+        lockoutRemainingSeconds: 0
+      };
+    }
+
     const now = Date.now();
     const remainingMs = Math.max(0, this.targetEndTime - now);
     const lockoutRemainingMs = Math.max(0, this.lockoutEndTime - now);
