@@ -1,0 +1,46 @@
+{
+  "name": "focus-break-timer",
+  "version": "1.0.0",
+  "description": "Windows Focus & Break Timer with smart break enforcement and auto media pause",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "keywords": [
+    "pomodoro",
+    "break-timer",
+    "productivity",
+    "windows",
+    "electron"
+  ],
+  "author": "RKZ",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^34.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.focusbreak.timer",
+    "productName": "FocusBreak",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "FocusBreak"
+    }
+  }
+}

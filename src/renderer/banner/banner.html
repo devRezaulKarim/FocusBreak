@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Break Warning</title>
+  <link rel="stylesheet" href="banner.css">
+</head>
+<body>
+  <div class="banner-card">
+    <div class="banner-header">
+      <div class="header-left">
+        <span class="bell-icon">⏳</span>
+        <span class="title">Break Starting Soon</span>
+      </div>
+      <button id="closeBtn" class="close-btn" title="Close banner (Timer will still continue)">✕</button>
+    </div>
+
+    <div class="banner-body">
+      <div class="countdown-text">
+        Screen locks in <span id="countdown" class="highlight">00:60</span>
+      </div>
+    </div>
+
+    <div class="banner-actions">
+      <button id="skipBtn" class="btn btn-secondary" title="Skip this break and continue working">Skip Break</button>
+      <button id="postponeBtn" class="btn btn-secondary" title="Delay break by 5 minutes">Postpone 5m</button>
+      <button id="breakNowBtn" class="btn btn-primary" title="Start break immediately">Break Now</button>
+    </div>
+  </div>
+
+  <script src="banner.js"></script>
+</body>
+</html>

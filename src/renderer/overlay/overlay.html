@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Break in Progress</title>
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <div class="overlay-container">
+    <div class="content-box" id="mainContent">
+      <div class="icon-wrap">
+        <span class="break-icon">☕</span>
+      </div>
+
+      <h1 class="break-title">Time for a Break</h1>
+      <p class="break-subtitle">Stand up, look away from the screen, and stretch your body.</p>
+
+      <div class="timer-display">
+        <span id="countdown">05:00</span>
+      </div>
+
+      <div class="action-area" id="actionArea">
+        <button id="skipBtn" class="skip-btn locked" disabled>
+          <span class="lock-icon" id="lockIcon">🔒</span>
+          <span id="skipBtnText">Skip locked (Available in 60s)</span>
+        </button>
+      </div>
+
+      <div class="emergency-tip">
+        Emergency exit: <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>Esc</kbd>
+      </div>
+    </div>
+  </div>
+
+  <script src="overlay.js"></script>
+</body>
+</html>
