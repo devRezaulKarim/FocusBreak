@@ -7,25 +7,64 @@
   <link rel="stylesheet" href="banner.css">
 </head>
 <body>
-  <div class="banner-card">
-    <div class="banner-header">
-      <div class="header-left">
-        <span class="bell-icon">⏳</span>
-        <span class="title">Break Starting Soon</span>
-      </div>
-      <button id="closeBtn" class="close-btn" title="Close banner (Timer will still continue)">✕</button>
+  <div class="banner-wrapper">
+    <!-- Subtle top progress line -->
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill"></div>
     </div>
 
-    <div class="banner-body">
-      <div class="countdown-text">
-        Screen locks in <span id="countdown" class="highlight">00:60</span>
+    <div class="banner-card">
+      <div class="banner-header">
+        <div class="header-left">
+          <div class="icon-badge">
+            <svg class="sand-clock-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>
+            </svg>
+          </div>
+          <div class="header-text-group">
+            <div class="title-row">
+              <span class="title">Upcoming Break</span>
+              <span class="countdown-badge" id="countdown">00:60</span>
+            </div>
+            <span class="subtitle">Screen will lock soon. Wrap up or take action:</span>
+          </div>
+        </div>
+        <button id="closeBtn" class="close-btn" title="Close banner (Timer continues)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
-    </div>
 
-    <div class="banner-actions">
-      <button id="skipBtn" class="btn btn-secondary" title="Skip this break and continue working">Skip Break</button>
-      <button id="postponeBtn" class="btn btn-secondary" title="Delay break by 5 minutes">Postpone 5m</button>
-      <button id="breakNowBtn" class="btn btn-primary" title="Start break immediately">Break Now</button>
+      <div class="banner-actions">
+        <button id="skipBtn" class="action-btn btn-glass" title="Skip this break and continue working">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19"></line>
+          </svg>
+          <span>Skip Break</span>
+        </button>
+
+        <button id="postponeBtn" class="action-btn btn-glass" title="Delay break by 5 minutes">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Postpone 5m</span>
+        </button>
+
+        <button id="breakNowBtn" class="action-btn btn-primary" title="Start full break immediately">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+          <span>Break Now</span>
+        </button>
+      </div>
     </div>
   </div>
 

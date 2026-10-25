@@ -7,28 +7,70 @@
   <link rel="stylesheet" href="overlay.css">
 </head>
 <body>
+  <!-- Ambient background glow aura -->
+  <div class="ambient-glow" id="ambientGlow"></div>
+
   <div class="overlay-container">
-    <div class="content-box" id="mainContent">
-      <div class="icon-wrap">
-        <span class="break-icon">☕</span>
+    <div class="content-box">
+      <!-- Breathing icon ring -->
+      <div class="breathing-ring-wrapper">
+        <div class="breathing-ring-pulse"></div>
+        <div class="icon-core">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+        </div>
       </div>
 
-      <h1 class="break-title">Time for a Break</h1>
-      <p class="break-subtitle">Stand up, look away from the screen, and stretch your body.</p>
+      <h1 class="break-title">Time to Recharge</h1>
 
-      <div class="timer-display">
-        <span id="countdown">05:00</span>
+      <!-- Rotating wellness suggestion -->
+      <div class="wellness-tip-container">
+        <span class="tip-icon">✨</span>
+        <span class="wellness-tip" id="wellnessTip">Look at something 20 feet away to relax your eyes.</span>
       </div>
 
+      <!-- Large Circular Timer -->
+      <div class="timer-dial-container">
+        <svg class="progress-ring" width="240" height="240" viewBox="0 0 240 240">
+          <circle class="ring-bg" cx="120" cy="120" r="105" />
+          <circle class="ring-progress" id="ringProgress" cx="120" cy="120" r="105" />
+        </svg>
+        <div class="timer-inner-content">
+          <span class="countdown-digits" id="countdown">05:00</span>
+          <span class="countdown-label">REMAINING</span>
+        </div>
+      </div>
+
+      <!-- Interactive Skip Button -->
       <div class="action-area" id="actionArea">
         <button id="skipBtn" class="skip-btn locked" disabled>
-          <span class="lock-icon" id="lockIcon">🔒</span>
+          <span class="btn-icon" id="btnIcon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </span>
           <span id="skipBtnText">Skip locked (Available in 60s)</span>
         </button>
       </div>
 
-      <div class="emergency-tip">
-        Emergency exit: <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>Esc</kbd>
+      <!-- Emergency escape shortcut -->
+      <div class="emergency-badge">
+        <span>Emergency bypass:</span>
+        <div class="keys-row">
+          <kbd>Ctrl</kbd>
+          <span class="plus">+</span>
+          <kbd>Alt</kbd>
+          <span class="plus">+</span>
+          <kbd>Shift</kbd>
+          <span class="plus">+</span>
+          <kbd>Esc</kbd>
+        </div>
       </div>
     </div>
   </div>

@@ -6,8 +6,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #000000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #03060a;
   color: #ffffff;
   width: 100vw;
   height: 100vh;
@@ -15,6 +15,30 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+/* Ambient pulsing aura in background */
+.ambient-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(99, 102, 241, 0.05) 45%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  animation: breatheGlow 8s infinite ease-in-out;
+}
+
+@keyframes breatheGlow {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
 }
 
 .overlay-container {
@@ -23,11 +47,12 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  animation: fadeIn 0.4s ease-out;
+  z-index: 2;
+  animation: fadeInSlow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.98); }
+@keyframes fadeInSlow {
+  from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -35,57 +60,150 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 650px;
-  padding: 40px;
+  max-width: 680px;
+  padding: 20px;
 }
 
-.icon-wrap {
-  width: 72px;
-  height: 72px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
+/* Breathing Ring Icon */
+.breathing-ring-wrapper {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
 }
 
-.break-icon {
-  font-size: 34px;
+.breathing-ring-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.25);
+  animation: pulseRing 3.5s infinite ease-in-out;
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 0.2; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.icon-core {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #60a5fa;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .break-title {
-  font-size: 38px;
+  font-size: 34px;
   font-weight: 700;
-  letter-spacing: -0.5px;
-  margin-bottom: 12px;
+  letter-spacing: -0.6px;
   color: #f8fafc;
+  margin-bottom: 8px;
 }
 
-.break-subtitle {
-  font-size: 16px;
+/* Wellness Tip */
+.wellness-tip-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 6px 16px;
+  margin-bottom: 34px;
+  backdrop-filter: blur(10px);
+}
+
+.tip-icon {
+  font-size: 13px;
+}
+
+.wellness-tip {
+  font-size: 13.5px;
   color: #94a3b8;
-  margin-bottom: 36px;
-  line-height: 1.5;
+  font-weight: 400;
+  transition: opacity 0.3s ease;
 }
 
-.timer-display {
-  font-size: 88px;
+/* Circular Timer Dial */
+.timer-dial-container {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 36px;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 8;
+}
+
+.ring-progress {
+  fill: none;
+  stroke: url(#ringGrad, #3b82f6);
+  stroke: #3b82f6;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 659.73; /* 2 * PI * 105 */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.6s linear, stroke 0.4s ease;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.6));
+}
+
+.timer-inner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.countdown-digits {
+  font-size: 54px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 2px;
+  letter-spacing: -1px;
   color: #ffffff;
-  margin-bottom: 40px;
-  text-shadow: 0 0 40px rgba(59, 130, 246, 0.25);
+  line-height: 1;
 }
 
+.countdown-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* Action Area & Modern Skip Button */
 .action-area {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 54px;
-  margin-bottom: 30px;
+  margin-bottom: 34px;
 }
 
 .skip-btn {
@@ -93,13 +211,14 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 14px 32px;
-  font-size: 15px;
+  padding: 13px 28px;
+  font-size: 14px;
   font-weight: 600;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid transparent;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
+  letter-spacing: 0.1px;
 }
 
 .skip-btn.locked {
@@ -107,39 +226,57 @@ body {
   color: #64748b;
   border-color: rgba(255, 255, 255, 0.08);
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .skip-btn.unlocked {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
   color: #ffffff;
   cursor: pointer;
   opacity: 1;
-  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 24px rgba(37, 99, 235, 0.45);
+  transform: translateY(0);
 }
 
 .skip-btn.unlocked:hover {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #1d4ed8, #4338ca);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.6);
 }
 
 .skip-btn.unlocked:active {
   transform: translateY(0);
 }
 
-.emergency-tip {
-  font-size: 12px;
+/* Emergency Badge */
+.emergency-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
   color: #475569;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
-.emergency-tip kbd {
-  background: rgba(255, 255, 255, 0.08);
+.keys-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.emergency-badge kbd {
+  background: rgba(255, 255, 255, 0.05);
   color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  padding: 2px 7px;
   font-family: inherit;
   font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.emergency-badge .plus {
+  color: #475569;
+  font-size: 10px;
 }
