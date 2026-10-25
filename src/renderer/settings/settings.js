@@ -8,6 +8,7 @@ const autoStartInput = document.getElementById('autoStart');
 const multiMonitorInput = document.getElementById('multiMonitor');
 const chimeSoundInput = document.getElementById('chimeSound');
 const cancelBtn = document.getElementById('cancelBtn');
+const saveBtn = document.getElementById('saveBtn');
 const saveStatus = document.getElementById('saveStatus');
 
 // Timer Card Elements
@@ -19,11 +20,44 @@ const timerSubtext = document.getElementById('timerSubtext');
 const toggleTimerBtn = document.getElementById('toggleTimerBtn');
 
 let currentState = 'IDLE';
+let savedConfig = null;
 
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function getCurrentFormValues() {
+  return {
+    workMinutes: parseInt(workMinutesInput.value, 10),
+    warningSeconds: parseInt(warningSecondsInput.value, 10),
+    breakMinutes: parseInt(breakMinutesInput.value, 10),
+    skipLockoutSeconds: parseInt(skipLockoutSecondsInput.value, 10),
+    pauseMedia: pauseMediaInput.checked,
+    autoStart: autoStartInput.checked,
+    multiMonitor: multiMonitorInput.checked,
+    chimeSound: chimeSoundInput.checked
+  };
+}
+
+function checkDirty() {
+  if (!savedConfig) {
+    saveBtn.disabled = true;
+    return;
+  }
+  const current = getCurrentFormValues();
+  const isDirty = (
+    current.workMinutes !== savedConfig.workMinutes ||
+    current.warningSeconds !== savedConfig.warningSeconds ||
+    current.breakMinutes !== savedConfig.breakMinutes ||
+    current.skipLockoutSeconds !== savedConfig.skipLockoutSeconds ||
+    current.pauseMedia !== savedConfig.pauseMedia ||
+    current.autoStart !== savedConfig.autoStart ||
+    current.multiMonitor !== savedConfig.multiMonitor ||
+    current.chimeSound !== savedConfig.chimeSound
+  );
+  saveBtn.disabled = !isDirty;
 }
 
 function updateUIState(state, remainingSeconds = 0) {
@@ -86,6 +120,10 @@ async function init() {
     multiMonitorInput.checked = !!config.multiMonitor;
     chimeSoundInput.checked = !!config.chimeSound;
 
+    // Cache initial saved configuration & set Save button disabled
+    savedConfig = getCurrentFormValues();
+    checkDirty();
+
     const status = await window.settingsAPI.getStatus();
     updateUIState(status.state, status.remainingSeconds);
   } catch (err) {
@@ -100,6 +138,11 @@ async function init() {
     updateUIState(data.currentState, 0);
   });
 }
+
+// Track any changes made by the user to enable/disable Save & Apply button
+['input', 'change'].forEach((eventName) => {
+  form.addEventListener(eventName, checkDirty);
+});
 
 toggleTimerBtn.addEventListener('click', async () => {
   if (!window.settingsAPI) return;
@@ -117,25 +160,20 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!window.settingsAPI) return;
 
-  const newConfig = {
-    workMinutes: parseInt(workMinutesInput.value, 10),
-    warningSeconds: parseInt(warningSecondsInput.value, 10),
-    breakMinutes: parseInt(breakMinutesInput.value, 10),
-    skipLockoutSeconds: parseInt(skipLockoutSecondsInput.value, 10),
-    pauseMedia: pauseMediaInput.checked,
-    autoStart: autoStartInput.checked,
-    multiMonitor: multiMonitorInput.checked,
-    chimeSound: chimeSoundInput.checked
-  };
+  const newConfig = getCurrentFormValues();
 
   try {
     const res = await window.settingsAPI.saveConfig(newConfig);
     if (res.success) {
-      saveStatus.textContent = 'Settings saved!';
+      savedConfig = getCurrentFormValues();
+      checkDirty(); // Disables button again until another change is made
+
+      saveStatus.style.color = '#10b981';
+      saveStatus.textContent = '✓ Settings saved and applied!';
       setTimeout(() => {
         saveStatus.textContent = '';
-        window.settingsAPI.close();
-      }, 700);
+      }, 2500);
+      // NOTE: GUI stays open so user can continue monitoring or managing
     } else {
       saveStatus.style.color = '#ef4444';
       saveStatus.textContent = 'Error: ' + res.error;
